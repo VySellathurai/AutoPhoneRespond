@@ -3,8 +3,10 @@ package com.cabinet.autointerphonereponse;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -12,16 +14,16 @@ import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
 import static android.support.v4.content.ContextCompat.startActivity;
-import static android.support.v4.content.ContextCompat.startForegroundService;
 
 /**
  * Created by Vyach on 22/03/2018.
  */
 public class PhoneStateReceiver extends BroadcastReceiver {
 
-
     @Override
     public void onReceive(Context context, Intent intent) {
+
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         //permet de connaitre l etat de l appel
         String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
@@ -36,18 +38,18 @@ public class PhoneStateReceiver extends BroadcastReceiver {
             //L appel est decroche
             Log.i("PhoneStateReceiver", "Offhook call from " + incomingNumber);
 
-            int composeNumber = 7;
+            Log.i("PhoneStateReceiver", prefs.getString("phoneNo", ""));
+            Log.i("PhoneStateReceiver", prefs.getString("noToCompose", ""));
 
             //dialCompose(context, composeNumber, 3);
-            
 
-            /*if (!killCall(context, 3)) {
+            if (!killCall(context, 3)) {
                 Log.e("PhoneStateReceiver", "Unable to Hung up the call");
-            }*/
+            }
         }
         if(state.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
             //ignored call
-            Log.i("PhoneStateReceiver", "Ignored call from " + incomingNumber);
+            Log.i("PhoneStateReceiver", "Termined call from " + incomingNumber);
         }
 
     }
@@ -71,8 +73,6 @@ public class PhoneStateReceiver extends BroadcastReceiver {
         Bundle extras = intent.getExtras();
 
         startActivity(context, intent, extras);
-
-
 
         Log.i("dialCompose", noToCompose + " done");
     }
