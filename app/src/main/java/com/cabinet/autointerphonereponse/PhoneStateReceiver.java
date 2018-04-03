@@ -28,28 +28,38 @@ public class PhoneStateReceiver extends BroadcastReceiver {
         //permet de connaitre l etat de l appel
         String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
         String incomingNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER);
+        String phoneNo = prefs.getString("phoneNo", "");
+        String noToCompose = prefs.getString("noToCompose", "");
 
-        if(state.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
-            //Appel entrant
-            Log.i("PhoneStateReceiver", "Receiving call from " + incomingNumber);
+        Log.i("PhoneStateReceiver", phoneNo);
+        Log.i("PhoneStateReceiver", noToCompose);
 
-        }
-        if(state.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
-            //L appel est decroche
-            Log.i("PhoneStateReceiver", "Offhook call from " + incomingNumber);
+        //si le num entrant est equal au sharedPrefs tel num alors on deroule le metier de l app
+        if (incomingNumber.equals(phoneNo)) {
+            Log.i("PhoneStateReceiver", "Incomming phone number = sharedPrefs phone no");
+            if(state.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
+                //Appel entrant
+                Log.i("PhoneStateReceiver", "Receiving call from " + incomingNumber);
 
-            Log.i("PhoneStateReceiver", prefs.getString("phoneNo", ""));
-            Log.i("PhoneStateReceiver", prefs.getString("noToCompose", ""));
-
-            //dialCompose(context, composeNumber, 3);
-
-            if (!killCall(context, 3)) {
-                Log.e("PhoneStateReceiver", "Unable to Hung up the call");
             }
+            if(state.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)) {
+                //L appel est decroche
+                Log.i("PhoneStateReceiver", "Offhook call from " + incomingNumber);
+
+                //dialCompose(context, composeNumber, 3);
+
+                if (!killCall(context, 3)) {
+                    Log.e("PhoneStateReceiver", "Unable to Hung up the call");
+                }
+            }
+            if(state.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
+                //ignored call
+                Log.i("PhoneStateReceiver", "Termined call from " + incomingNumber);
+            }
+
         }
-        if(state.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
-            //ignored call
-            Log.i("PhoneStateReceiver", "Termined call from " + incomingNumber);
+        else {
+            Log.i("PhoneStateReceiver", "Incomming phone number != sharedPrefs phone no");
         }
 
     }
