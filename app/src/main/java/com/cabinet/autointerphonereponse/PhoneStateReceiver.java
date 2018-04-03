@@ -3,8 +3,10 @@ package com.cabinet.autointerphonereponse;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -20,8 +22,11 @@ import static android.support.v4.content.ContextCompat.startForegroundService;
 public class PhoneStateReceiver extends BroadcastReceiver {
 
 
+
     @Override
     public void onReceive(Context context, Intent intent) {
+
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         //permet de connaitre l etat de l appel
         String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
@@ -39,11 +44,14 @@ public class PhoneStateReceiver extends BroadcastReceiver {
             int composeNumber = 7;
 
             //dialCompose(context, composeNumber, 3);
+
+            Log.i("Offhook call", prefs.getString("phoneNo", ""));
+            Log.i("Offhook call", prefs.getString("noToCompose", ""));
             
 
-            /*if (!killCall(context, 3)) {
+            if (!killCall(context, 3)) {
                 Log.e("PhoneStateReceiver", "Unable to Hung up the call");
-            }*/
+            }
         }
         if(state.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
             //ignored call
