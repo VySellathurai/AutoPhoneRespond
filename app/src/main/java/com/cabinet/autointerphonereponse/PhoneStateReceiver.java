@@ -14,14 +14,11 @@ import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
 import static android.support.v4.content.ContextCompat.startActivity;
-import static android.support.v4.content.ContextCompat.startForegroundService;
 
 /**
  * Created by Vyach on 22/03/2018.
  */
 public class PhoneStateReceiver extends BroadcastReceiver {
-
-
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -41,13 +38,10 @@ public class PhoneStateReceiver extends BroadcastReceiver {
             //L appel est decroche
             Log.i("PhoneStateReceiver", "Offhook call from " + incomingNumber);
 
-            int composeNumber = 7;
+            Log.i("PhoneStateReceiver", prefs.getString("phoneNo", ""));
+            Log.i("PhoneStateReceiver", prefs.getString("noToCompose", ""));
 
             //dialCompose(context, composeNumber, 3);
-
-            Log.i("Offhook call", prefs.getString("phoneNo", ""));
-            Log.i("Offhook call", prefs.getString("noToCompose", ""));
-            
 
             if (!killCall(context, 3)) {
                 Log.e("PhoneStateReceiver", "Unable to Hung up the call");
@@ -55,7 +49,7 @@ public class PhoneStateReceiver extends BroadcastReceiver {
         }
         if(state.equals(TelephonyManager.EXTRA_STATE_IDLE)) {
             //ignored call
-            Log.i("PhoneStateReceiver", "Ignored call from " + incomingNumber);
+            Log.i("PhoneStateReceiver", "Termined call from " + incomingNumber);
         }
 
     }
@@ -79,8 +73,6 @@ public class PhoneStateReceiver extends BroadcastReceiver {
         Bundle extras = intent.getExtras();
 
         startActivity(context, intent, extras);
-
-
 
         Log.i("dialCompose", noToCompose + " done");
     }

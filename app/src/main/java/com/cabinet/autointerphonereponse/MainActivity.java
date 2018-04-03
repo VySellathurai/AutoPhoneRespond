@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -17,8 +16,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int PERMISSION_ALL = 1;
     private String[] PERMISSIONS = {Manifest.permission.READ_PHONE_STATE, Manifest.permission.CALL_PHONE};
-    private EditText phoneNo;
-    private EditText noToCompose;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,46 +28,17 @@ public class MainActivity extends AppCompatActivity {
 
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        phoneNo = (EditText) findViewById(R.id.et_phoneNo);
-        noToCompose = (EditText) findViewById(R.id.et_noToCompose);
+        EditText phoneNo = findViewById(R.id.et_phoneNo);
+        EditText noToCompose = findViewById(R.id.et_noToCompose);
 
         phoneNo.setText(prefs.getString("phoneNo", ""));
         noToCompose.setText(prefs.getString("noToCompose", ""));
 
-        phoneNo.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                prefs.edit().putString("phoneNo", s.toString()).commit();
-            }
-        });
-
-        noToCompose.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                prefs.edit().putString("noToCompose", s.toString()).commit();
-            }
-        });
+        phoneNo.addTextChangedListener(this.setWatcher(prefs, "phoneNo"));
+        noToCompose.addTextChangedListener(this.setWatcher(prefs, "noToCompose"));
     }
+
+
 
     @Override
     public void onRequestPermissionsResult(int  requestCode,
@@ -85,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
                 else {
 
                 }
-                return;
             }
         }
     }
@@ -99,6 +66,32 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return true;
+    }
+
+    /**
+     *
+     * @param prefs required to configure the sharedPrefs
+     * @param idPref required to configure the sharedPrefs
+     * @return a watcher with a configured sharedPrefs
+     */
+    private TextWatcher setWatcher(final SharedPreferences prefs, final String idPref) {
+
+        return new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                prefs.edit().putString(idPref, s.toString()).commit();
+            }
+        };
     }
 
 
