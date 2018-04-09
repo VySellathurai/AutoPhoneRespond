@@ -4,16 +4,19 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.KeyEvent;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
-import static android.support.v4.content.ContextCompat.startActivity;
+import static android.content.Context.TELEPHONY_SERVICE;
 
 /**
  * Created by Vyach on 22/03/2018.
@@ -21,7 +24,7 @@ import static android.support.v4.content.ContextCompat.startActivity;
 public class PhoneStateReceiver extends BroadcastReceiver {
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, Intent intent) {
 
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
@@ -29,14 +32,42 @@ public class PhoneStateReceiver extends BroadcastReceiver {
         String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
         String incomingNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER);
         String phoneNo = prefs.getString("phoneNo", "");
-        String noToCompose = prefs.getString("noToCompose", "");
+        int noToCompose = Integer.parseInt(prefs.getString("noToCompose", ""));
 
-        Log.i("PhoneStateReceiver", phoneNo);
-        Log.i("PhoneStateReceiver", noToCompose);
+        Log.i("PhoneStateReceiver", "Phone number from param " + phoneNo);
+        Log.i("PhoneStateReceiver", "No to compose from param " + noToCompose);
+
+
 
         //si le num entrant est equal au sharedPrefs tel num alors on deroule le metier de l app
         if (incomingNumber.equals(phoneNo)) {
             Log.i("PhoneStateReceiver", "Incomming phone number = sharedPrefs phone no");
+
+            /*Intent buttonUp = new Intent(Intent.ACTION_MEDIA_BUTTON);
+            Intent buttonDown = new Intent(Intent.ACTION_MEDIA_BUTTON);
+            buttonUp.putExtra(Intent.EXTRA_KEY_EVENT,
+                    new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_HEADSETHOOK));
+            buttonDown.putExtra(Intent.EXTRA_KEY_EVENT,
+                    new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_HEADSETHOOK));
+            //context.sendOrderedBroadcast(buttonDown, "android.permission.CALL_PRIVILEGED");
+
+            context.sendOrderedBroadcast(buttonUp, "android.permission.CALL_PRIVILEGED");*/
+
+            Bundle extras = intent.getExtras();
+            String phoneNumber = "";
+            if (extras != null)
+            {
+                String etat = extras.getString(TelephonyManager.EXTRA_STATE);
+                //if (etat.equals(TelephonyManager.EXTRA_STATE_RINGING))
+                //    phoneNumber = extras.getString(TelephonyManager.EXTRA_INCOMING_NUMBER);
+
+                Intent i = new Intent(context, AcceptCallActivity.class);
+                i.putExtras(intent);
+                i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(i);
+            }
+
+
             if(state.equals(TelephonyManager.EXTRA_STATE_RINGING)) {
                 //Appel entrant
                 Log.i("PhoneStateReceiver", "Receiving call from " + incomingNumber);
@@ -46,7 +77,7 @@ public class PhoneStateReceiver extends BroadcastReceiver {
                 //L appel est decroche
                 Log.i("PhoneStateReceiver", "Offhook call from " + incomingNumber);
 
-                //dialCompose(context, composeNumber, 3);
+                sendDTMF(noToCompose, 3);
 
                 if (!killCall(context, 3)) {
                     Log.e("PhoneStateReceiver", "Unable to Hung up the call");
@@ -65,12 +96,10 @@ public class PhoneStateReceiver extends BroadcastReceiver {
     }
 
     /**
-     * compose number from dial depends on the context
-     * @param context context used for compose the dial
      * @param noToCompose number to compose in the dial
      * @param secondToWait int second to wait before compsing in dial
      */
-    private void dialCompose(Context context, int noToCompose, int secondToWait) {
+    private void sendDTMF(int noToCompose, int secondToWait) {
 
         try {
             TimeUnit.SECONDS.sleep(secondToWait);
@@ -79,12 +108,17 @@ public class PhoneStateReceiver extends BroadcastReceiver {
             Log.e("Exception", e.getMessage());
         }
 
-        Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:,"+Uri.encode(noToCompose+"")));
+        /*Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:,"+Uri.encode(noToCompose+"")));
         Bundle extras = intent.getExtras();
 
         startActivity(context, intent, extras);
 
         Log.i("dialCompose", noToCompose + " done");
+        */
+
+        ToneGenerator toneGen = new ToneGenerator(AudioManager.STREAM_DTMF, 500);
+        toneGen.startTone(noToCompose);
+        toneGen.stopTone();
     }
 
     /**
@@ -100,7 +134,7 @@ public class PhoneStateReceiver extends BroadcastReceiver {
             TimeUnit.SECONDS.sleep(secondToWait);
             // Get the boring old TelephonyManager
             TelephonyManager telephonyManager =
-                    (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+                    (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);
 
             // Get the getITelephony() method
             Class classTelephony = Class.forName(telephonyManager.getClass().getName());
