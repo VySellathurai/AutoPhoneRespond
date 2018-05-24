@@ -1,7 +1,6 @@
 package com.cabinet.autointerphonereponse.service;
 
 
-import android.annotation.TargetApi;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.os.Build;
@@ -15,9 +14,8 @@ import com.cabinet.autointerphonereponse.utils.Utils;
 import java.io.IOException;
 
 /**
- * Created by Vyach on 02/05/2018.
+ * This class allow to read notification and hung up the call
  */
-
 @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class NLService extends NotificationListenerService {
 

@@ -15,9 +15,6 @@ import java.util.concurrent.TimeUnit;
 
 import static android.content.Context.TELEPHONY_SERVICE;
 
-/**
- * Created by Vyach on 22/03/2018.
- */
 public class PhoneStateReceiver extends BroadcastReceiver {
 
     @Override

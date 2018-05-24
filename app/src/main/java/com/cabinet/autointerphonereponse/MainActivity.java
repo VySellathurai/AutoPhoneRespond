@@ -21,7 +21,8 @@ public class MainActivity extends AppCompatActivity {
     private String[] PERMISSIONS = {Manifest.permission.READ_PHONE_STATE,
                                     Manifest.permission.CALL_PHONE,
                                     Manifest.permission.CALL_PRIVILEGED,
-                                    Manifest.permission.MODIFY_PHONE_STATE};
+                                    Manifest.permission.MODIFY_PHONE_STATE
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
