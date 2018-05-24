@@ -1,7 +1,7 @@
 package com.cabinet.autointerphonereponse;
 
 import android.Manifest;
-import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
@@ -10,23 +10,37 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.widget.EditText;
+
+import com.cabinet.autointerphonereponse.utils.Permission;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int PERMISSION_ALL = 1;
-    private String[] PERMISSIONS = {Manifest.permission.READ_PHONE_STATE, Manifest.permission.CALL_PHONE};
+    private String[] PERMISSIONS = {Manifest.permission.READ_PHONE_STATE,
+                                    Manifest.permission.CALL_PHONE,
+                                    Manifest.permission.CALL_PRIVILEGED,
+                                    Manifest.permission.MODIFY_PHONE_STATE};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if(!hasPermissions(this, PERMISSIONS)) {
+
+        if(!Permission.hasPermissions(this, PERMISSIONS)) {
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
         }
 
+        //Allow to go the the notification permission intent
+        Intent intent = new
+                Intent("android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS");
+        startActivity(intent);
+
         final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        Log.i("MainActivity", "Current version : " + Permission.currentVersion());
 
         EditText phoneNo = findViewById(R.id.et_phoneNo);
         EditText noToCompose = findViewById(R.id.et_noToCompose);
@@ -57,16 +71,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static boolean hasPermissions(Context context, String... permissions) {
-        if (context != null && permissions != null) {
-            for (String permission : permissions) {
-                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
 
     /**
      *
